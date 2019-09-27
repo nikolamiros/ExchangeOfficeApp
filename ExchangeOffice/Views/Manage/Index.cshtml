@@ -1,0 +1,27 @@
+﻿@model ExchangeOffice.ViewModels.IndexViewModel
+@{
+    ViewBag.Title = "Podešavanja";
+}
+
+<h2>@ViewBag.Title.</h2>
+
+<p class="text-success">@ViewBag.StatusMessage</p>
+<div>
+    <h4>Promeni podešavanja naloga</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>Lozinka:</dt>
+        <dd>
+            [
+            @if (Model.HasPassword)
+            {
+                @Html.ActionLink("Promeni lozinku", "ChangePassword")
+            }
+            else
+            {
+                @Html.ActionLink("Create", "SetPassword")
+            }
+            ]
+        </dd>
+    </dl>
+</div>

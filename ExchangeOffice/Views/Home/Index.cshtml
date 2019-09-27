@@ -1,0 +1,528 @@
+﻿@using ExchangeOffice.ViewModels
+
+
+<!-- Icon Cards-->
+<div class="row">
+
+    <div class="col-xl-4 mb-3">
+        <button type="button" class="btn btn-primary btn-lg" style="width: 100%" data-toggle="modal" data-target="#otkupModal">
+            <div class="card text-white bg-primary o-hidden h-100" style="border: 0 !important">
+                <div class="card-body">
+                    <div class="card-body-icon">
+                        <i class="fas fa-fw fa-arrow-right"></i>
+                    </div>
+                    <div class="mr-5">Otkup</div>
+                </div>
+            </div>
+        </button>
+    </div>
+
+    <div class="col-xl-4 mb-3">
+        <button type="button" class="btn btn-success btn-lg" style="width: 100%" data-toggle="modal" data-target="#prodajaModal">
+            <div class="card text-white bg-success o-hidden h-100" style="border: 0 !important">
+                <div class="card-body">
+                    <div class="card-body-icon">
+                        <i class="fas fa-fw fa-arrow-left"></i>
+                    </div>
+                    <div class="mr-5">Prodaja</div>
+                </div>
+            </div>
+        </button>
+    </div>
+
+    <div class="col-xl-4 mb-3">
+        <button type="button" class="btn btn-danger btn-lg" style="width: 100%" data-toggle="modal" data-target="#konverzijaModal">
+            <div class="card text-white bg-danger o-hidden h-100" style="border: 0 !important">
+                <div class="card-body">
+                    <div class="card-body-icon">
+                        <i class="fas fa-fw fa-retweet"></i>
+                    </div>
+                    <div class="mr-5">Konverzija</div>
+                </div>
+            </div>
+        </button>
+    </div>
+</div>
+
+<div class="card text-center">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#transakcije" role="tab" aria-controls="home" aria-selected="true">Tekuce transakcije</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#stornirane" role="tab" aria-controls="profile" aria-selected="false">Stornirane transakcije</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="transakcije" role="tabpanel" aria-labelledby="home-tab">
+
+                <table class="table col-lg-12" id="listaTransakcija">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Vreme</th>
+                            <th scope="col">Tip</th>
+                            <th scope="col">Iznos</th>
+                            <th scope="col">Valuta</th>
+                            <th scope="col">Komande</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="tab-pane fade" id="stornirane" role="tabpanel" aria-labelledby="profile-tab">
+                <table class="table col-lg-12" id="listaStorniranihTransakcija">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Vreme</th>
+                            <th scope="col">Tip</th>
+                            <th scope="col">Iznos</th>
+                            <th scope="col">Valuta</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@using (Ajax.BeginForm("Konverzija", "Home", new AjaxOptions
+{
+    HttpMethod = "POST",
+    UpdateTargetId = "konverzijaModal",
+    InsertionMode = InsertionMode.Replace,
+    OnSuccess = "onKonverzijaSuccess",
+    OnFailure = "onKonverzijaFailed"
+}, new { @class = "form-horizontal" }))
+{
+    <div class="modal fade" id="konverzijaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        @{ Html.RenderPartial("_KonverzijaPartial", new KonverzijaViewModel()); }
+    </div>
+}
+
+
+@using (Ajax.BeginForm("Otkup", "Home", new AjaxOptions
+{
+    HttpMethod = "POST",
+    UpdateTargetId = "otkupModal",
+    InsertionMode = InsertionMode.Replace,
+    OnSuccess = "onOtkupSuccess",
+    OnFailure = "onOtkupFailed"
+}))
+{
+    <div class="modal fade" id="otkupModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        @{ Html.RenderPartial("_OtkupPartial", new OtkupViewModel()); }
+    </div>
+}
+
+
+@using (Ajax.BeginForm("Prodaja", "Home", new AjaxOptions
+{
+    HttpMethod = "POST",
+    UpdateTargetId = "prodajaModal",
+    InsertionMode = InsertionMode.Replace,
+    OnSuccess = "onProdajaSuccess",
+    OnFailure = "onProdajaFailed"
+}))
+{
+    <div class="modal fade" id="prodajaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        @{ Html.RenderPartial("_ProdajaPartial", new ProdajaViewModel()); }
+    </div>
+}
+
+
+@using (Ajax.BeginForm("Storniranje", "Home", new AjaxOptions
+{
+    HttpMethod = "POST",
+    UpdateTargetId = "stornirajModal",
+    InsertionMode = InsertionMode.Replace,
+    OnSuccess = "onStornirajSuccess",
+    OnFailure = "onStornirajFailed"
+}))
+{
+    <div class="modal fade" id="stornirajModal" tabindex="-1" role="dialog" aria-labelledby="stornirajModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Storniranje</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="idTransakcijeZaStorniranje" id="idTransakcijeZaStorniranje" value="" />
+                    Da li ste sigurni da želite da stornirate transakciju?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+                    <button type="submit" class="btn btn-primary">Storniraj</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@section scripts {
+
+    <script>
+
+        var listaTransakcija = null;
+
+        var listaStorniranihTransakcija = null;
+
+        $(document).ready(function () {
+
+            $('a[href="' + window.location.pathname + '"]').parent().addClass('active');
+
+            listaTransakcija = $('#listaTransakcija').DataTable({
+                "pageLength": 20,
+                scrollY: '42vh',
+                scrollCollapse: true,
+                ordering: false,
+                autoWidth: false,
+                lengthChange: false,
+                searching: false,
+                ajax: {
+                    url: "Home/VratiMenjackeTransakcije",
+                    type: "GET",
+                    dataSrc: "",
+                    contentType: "application/json"
+                },
+                columns: [
+                    {
+                        data: "Id",
+                        className: "text-center",
+                        visible: true,
+                        orderable: true
+                    },
+                    {
+                        data: "DatumTransakcije",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Tip",
+                        className: "text-center",
+                        render: function (data, type, row) {
+                            var display = data;
+                            if (data != null) {
+
+                                if (row.Tip === "Prodaja") {
+
+                                    display = '<span class="badge badge-success" style="background=#007bff">' + data + "</span>";
+                                } else if (row.Tip === "Otkup") {
+
+                                    display = '<span class="badge badge-primary">' + data + "</span>";
+                                } else {
+                                    display = '<span class="badge badge-danger">' + data + "</span>";
+                                }
+                            }
+                            return display;
+                        }
+                    },
+                    {
+                        data: "Iznos",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Valuta",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Id",
+                        className: "text-center",
+                        render: function (data, type, row) {
+                            var display = '<button type="button" data-id="' + row.Id + '" class="open-storniranje btn btn-sm btn-danger" data-toggle="modal" data-target="#stornirajModal">' +
+                                "Storniraj" +
+                                "</button >";
+                            return display;
+                        }
+                    }
+                ],
+                "oLanguage": {
+                    "oPaginate": {
+                        "sNext": "Sledeća stranica",
+                        "sPrevious": "Prethodna stranica",
+                        "sInfoEmpty": "Nema stavki",
+                        "sInfo": "Got a total of _TOTAL_ entries to show (_START_ to _END_)",
+                        "sEmptyTable": "Nema podataka"
+                    }
+                }
+            });
+
+            $("#listaTransakcija_wrapper").addClass("col-12");
+
+
+
+            listaStorniranihTransakcija = $('#listaStorniranihTransakcija').DataTable({
+                "pageLength": 7,
+                scrollCollapse: true,
+                ordering: false,
+                autoWidth: false,
+                lengthChange: false,
+                searching: false,
+                ajax: {
+                    url: "Home/VratiStorniraneMenjackeTransakcije",
+                    type: "GET",
+                    dataSrc: "",
+                    contentType: "application/json"
+                },
+                columns: [
+                    {
+                        data: "Id",
+                        className: "text-center",
+                        visible: true,
+                        orderable: true
+                    },
+                    {
+                        data: "DatumTransakcije",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Tip",
+                        className: "text-center",
+                        render: function (data, type, row) {
+                            var display = data;
+                            if (data != null) {
+
+                                if (row.Tip === "Prodaja") {
+
+                                    display = '<span class="badge badge-success" style="background=#007bff">' + data + "</span>";
+                                } else if (row.Tip === "Otkup") {
+
+                                    display = '<span class="badge badge-primary">' + data + "</span>";
+                                } else {
+                                    display = '<span class="badge badge-danger">' + data + "</span>";
+                                }
+                            }
+                            return display;
+                        }
+                    },
+                    {
+                        data: "Iznos",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Valuta",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    }
+                ],
+                "oLanguage": {
+                    "oPaginate": {
+                        "sNext": "Sledeća stranica",
+                        "sPrevious": "Prethodna stranica",
+                        "sInfoEmpty": "Nema stavki",
+                        "sInfo": "Got a total of _TOTAL_ entries to show (_START_ to _END_)",
+                        "sEmptyTable": "Nema podataka"
+                    }
+                }
+            });
+
+            $("#listaStorniranihTransakcija_wrapper").addClass("col-12");
+
+
+
+
+
+            $(document).on("click", ".open-storniranje", function () {
+
+                var idTransakcije = $(this).data('id');
+                $("#idTransakcijeZaStorniranje").val(idTransakcije);
+            });
+
+            $('#konverzijaModal').on('hidden.bs.modal', function () {
+                $.ajax({
+                    url: "Home/Konverzija",
+                    type: "GET",
+                    dataType: 'html',
+                    success: function (data) {
+                        $("#konverzijaModal").html(data);
+                        konverzijaAddListeners();
+                    }
+                });
+            });
+
+            konverzijaAddListeners();
+
+            $('#otkupModal').on('hidden.bs.modal', function () {
+                $.ajax({
+                    url: "Home/Otkup",
+                    type: "GET",
+                    dataType: 'html',
+                    success: function (data) {
+                        $("#otkupModal").html(data);
+                        otkupAddListeners();
+                    }
+                });
+            });
+
+            otkupAddListeners();
+
+            $('#prodajaModal').on('hidden.bs.modal', function () {
+                $.ajax({
+                    url: "Home/Prodaja",
+                    type: "GET",
+                    dataType: 'html',
+                    success: function (data) {
+                        $("#prodajaModal").html(data);
+                        prodajaAddListeners();
+                    }
+                });
+            });
+
+            prodajaAddListeners();
+        });
+
+
+        function konverzijaAddListeners() {
+
+            $("#SifraValutaU, #SifraValutaIz, #IznosIz").change(function () {
+
+                var valutaU = $("#SifraValutaU").val();
+                var valutaIz = $("#SifraValutaIz").val();
+                var iznos = $("#IznosIz").val();
+
+                if (valutaU != null && valutaIz != null && iznos != null) {
+
+                    $.ajax({
+
+                        url: "Home/IzracunajIznosKonverzije?SifraValutaU=" + valutaU + "&SifraValutaIz=" + valutaIz + "&IznosIz=" + iznos,
+                        type: "GET",
+                        dataType: 'html',
+                        success: function (data) {
+
+                            console.log(data);
+                            $("#Rezultat").val(data);
+                        }
+                    });
+                }
+            });
+        }
+
+        function otkupAddListeners() {
+
+            $("#otkup_SifraValuta, #otkup_Iznos").change(function () {
+
+                var valuta = $("#otkup_SifraValuta").val();
+                var iznos = $("#otkup_Iznos").val();
+
+                if (valuta != null && iznos != null) {
+
+                    $.ajax({
+
+                        url: "Home/IzracunajIznosOtkupa?SifraValuta=" + valuta + "&Iznos=" + iznos,
+                        type: "GET",
+                        dataType: 'html',
+                        success: function (data) {
+
+                            console.log(data);
+                            $("#otkup_Rezultat").val(data);
+                        }
+                    });
+                }
+            });
+        }
+
+        function prodajaAddListeners() {
+
+            $("#prodaja_SifraValuta, #prodaja_Iznos").change(function () {
+
+                var valuta = $("#prodaja_SifraValuta").val();
+                var iznos = $("#prodaja_Iznos").val();
+
+                if (valuta != null && iznos != null) {
+
+                    $.ajax({
+
+                        url: "Home/IzracunajIznosProdaje?SifraValuta=" + valuta + "&Iznos=" + iznos,
+                        type: "GET",
+                        dataType: 'html',
+                        success: function (data) {
+
+                            console.log(data);
+                            $("#prodaja_Rezultat").val(data);
+                        }
+                    });
+                }
+            });
+        }
+
+
+
+        function onKonverzijaSuccess() {
+
+            $("#konverzijaModal").modal('toggle');
+
+            listaTransakcija.ajax.reload();
+        };
+
+        function onKonverzijaFailed(data) {
+
+            $("#konverzijaModal").html(data.responseText);
+        };
+
+
+        function onOtkupSuccess() {
+
+            $("#otkupModal").modal('toggle');
+
+            listaTransakcija.ajax.reload();
+        };
+
+        function onOtkupFailed(data) {
+
+            $("#otkupModal").html(data.responseText);
+        };
+
+
+        function onProdajaSuccess() {
+
+            $("#prodajaModal").modal('toggle');
+
+            listaTransakcija.ajax.reload();
+        };
+
+        function onProdajaFailed(data) {
+
+            $("#prodajaModal").html(data.responseText);
+        };
+
+
+        function onStornirajSuccess() {
+
+            $("#stornirajModal").modal('toggle');
+
+            listaTransakcija.ajax.reload();
+
+            listaStorniranihTransakcija.ajax.reload();
+        };
+
+        function onStornirajFailed(data) {
+
+            $("#stornirajModal").html(data.responseText);
+        };
+
+    </script>
+}

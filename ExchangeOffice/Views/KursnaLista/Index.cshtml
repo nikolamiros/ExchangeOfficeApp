@@ -1,0 +1,308 @@
+﻿@using ExchangeOffice.ViewModels
+@{
+    ViewBag.Title = "Blagajna";
+}
+
+<div style=" height: 100%; padding-left: 0; padding-right: 0;">
+
+    <div class="card" style="height: 50%; overflow: hidden;">
+        
+        <div class="card-header"> Kursne liste
+            <div class="fa-pull-right">
+                <button type="button" id="dodajListuBtn" class="btn btn-primary btn-sm">Dodaj danjašnju kursnu listu</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="KursneListeTabContent">
+                <table class="table col-lg-12" id="listaKursnihLista">
+                    <thead>
+                    <tr>
+                        <th scope="col" hidden="hidden">Valuta</th>
+                        <th scope="col">Datum</th>
+                        <th scope="col">Opis</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header"> Stavke kursne liste </div>
+        <div class="card-body" >
+            <div class="tab-content" id="myTabContent">
+                <table class="table col-lg-12" id="listaStavkiKursneListe">
+                    <thead>
+                        <tr>
+                            <th scope="col">Valuta</th>
+                            <th scope="col">Kupovni kurs</th>
+                            <th scope="col">Srednji kurs</th>
+                            <th scope="col">Prodajni kurs</th>
+                            <th scope="col">Komande</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@using (Ajax.BeginForm("IzmeniStavkuKursneListe", "KursnaLista", new AjaxOptions
+{
+    HttpMethod = "POST",
+    UpdateTargetId = "izmenaStavkeKursneListe",
+    InsertionMode = InsertionMode.Replace,
+    OnSuccess = "onIzmenaSuccess",
+    OnFailure = "onIzmenaFailed"
+}))
+{
+    <div class="modal fade" id="izmenaStavkeKursneListeModal" tabindex="-1" role="dialog" aria-hidden="true">
+        @{ Html.RenderPartial("_IzmeniStavkuPartial", new StavkaKursneListeEditViewModel()); }
+    </div>
+}
+
+
+
+@section scripts {
+
+    <script>
+
+        var listaKursnihLista = null;
+        var listaStavki = null;
+        var izabraniDatum = '';
+        var izabranaValuta = '';
+
+        $(document).ready(function () {
+
+            $('a[href="' + window.location.pathname + '"]').parent().addClass('active');
+
+            listaKursnihLista = $('#listaKursnihLista').DataTable({
+                select: true,
+                ordering: false,
+                paging: false,
+                bInfo: false,
+                autoWidth: false,
+                lengthChange: false,
+                searching: false,
+                ajax: {
+                    url: "KursnaLista/VratiKursneListe",
+                    type: "GET",
+                    dataSrc: "",
+                    contentType: "application/json"
+                },
+                columns: [
+                    {
+                        data: "SifraValute",
+                        className: "text-center",
+                        visible: false,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Datum",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Opis",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    }
+                ],
+                "oLanguage": {
+                    "oPaginate": {
+                        "sNext": "Sledeća stranica",
+                        "sPrevious": "Prethodna stranica",
+                        "sInfoEmpty": "Nema stavki",
+                        "sInfo": "Got a total of _TOTAL_ entries to show (_START_ to _END_)",
+                        "sEmptyTable": "Nema podataka"
+                    }
+                },
+                "initComplete": function (settings, json) {
+
+                    if (json && json[0]) {
+
+                        var today = new Date();
+                        var formatedDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+                        var datumposlednjeListe = json[0].Datum;
+
+                        if (formatedDate === datumposlednjeListe) {
+
+                            $('#dodajListuBtn').prop("disabled", true);
+                        }
+                    }
+                }
+            });
+
+            listaKursnihLista.on('select', function (e, dt, type, indexes) {
+
+                if (type === 'row') {
+
+                    var data = listaKursnihLista.rows(indexes).data();
+                    izabraniDatum = data[0].Datum;
+                    izabranaValuta = data[0].SifraValute;
+                    osveziListuStavki();
+                }
+            });
+
+            listaKursnihLista.on('deselect', function (e, dt, type, indexes) {
+
+                if (type === 'row') {
+
+                    izabraniDatum = '';
+                    izabranaValuta = '';
+                    osveziListuStavki();
+                }
+            });
+            
+            listaStavki = $('#listaStavkiKursneListe').DataTable({
+                scrollY:        '25vh',
+                scrollCollapse: true,
+                ordering: false,
+                paging: false,
+                bInfo: false,
+                autoWidth: false,
+                lengthChange: false,
+                searching: false,
+                ajax: {
+                    url: "KursnaLista/VratiStavkeListe",
+                    type: "GET",
+                    dataSrc: "",
+                    contentType: "application/json"
+                },
+                columns: [
+                    {
+                        data: "Valuta",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "KupovniKurs",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "SrednjiKurs",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "ProdajniKurs",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Komande",
+                        className: "text-center",
+                        render: function (data, type, row) {
+                            var display = '<button type="button" ' +
+                                'data-valuta="' +
+                                row.Valuta +
+                                '"' +
+                                'data-kupovniKurs="' +
+                                row.KupovniKurs +
+                                '"' +
+                                'data-srednjiKurs="' +
+                                row.SrednjiKurs +
+                                '"' +
+                                'data-prodajniKurs="' +
+                                row.ProdajniKurs +
+                                '"' +
+                                'class="izmeni-stavku btn btn-sm btn-success" data-toggle="modal" data-target="#izmenaStavkeKursneListeModal">' +
+                                "Izmeni" +
+                                "</button >";
+                            return display;
+                        }
+                    }
+                ],
+                "oLanguage": {
+                    "oPaginate": {
+                        "sNext": "Sledeća stranica",
+                        "sPrevious": "Prethodna stranica",
+                        "sInfoEmpty": "Nema stavki",
+                        "sInfo": "Got a total of _TOTAL_ entries to show (_START_ to _END_)",
+                        "sEmptyTable": "Nema podataka"
+                    }
+                },
+                "initComplete": function (settings, json) {
+
+                }
+            });
+
+            $("#dodajListuBtn").click(function () {
+
+                $.ajax({
+                    url: 'KursnaLista/KreirajDanasnjuListu',
+                    type: 'POST',
+                    datatype: 'json',
+                    success: function (data) {
+
+                        osveziListuKursnihLista();
+                        osveziListuStavki();
+                        $('#dodajListuBtn').prop("disabled", true);
+                    },
+                    error: function (jqXhr, textStatus, errorThrown) {
+
+                    }
+                });
+            });
+
+            $(document).on("click", ".izmeni-stavku", function () {
+
+                console.log(this);
+                $("#izmena_datumListe").val(izabraniDatum);
+                $("#izmena_valutaListe").val(izabranaValuta);
+                $("#izmena_valuta").val($(this).data('valuta'));
+                $("#izmena_kupovniKurs").val($(this).data('kupovnikurs'));
+                $("#izmena_srednjiKurs").val($(this).data('srednjikurs'));
+                $("#izmena_prodajniKurs").val($(this).data('prodajnikurs'));
+            });
+            
+            $("#listaKursnihLista_wrapper").addClass("col-12");
+
+            $("#listaStavkiKursneListe_wrapper").addClass("col-12");
+        });
+
+        function osveziListuKursnihLista() {
+
+            listaKursnihLista.ajax.reload();
+        };
+
+        function osveziListuStavki() {
+
+            if (izabraniDatum && izabranaValuta) {
+
+                listaStavki.ajax.url("KursnaLista/VratiStavkeListe?izabraniDatum=" + izabraniDatum + '&izabranaValuta=' + izabranaValuta).load();
+            } else {
+
+                listaStavki.ajax.url("KursnaLista/VratiStavkeListe").load();
+            }
+        };
+
+        function onIzmenaSuccess() {
+
+            $("#izmenaStavkeKursneListeModal").modal('toggle');
+
+            osveziListuStavki();
+        };
+
+        function onIzmenaFailed(data) {
+
+            $("#izmenaStavkeKursneListeModal").html(data.responseText);
+        };
+
+    </script>
+}

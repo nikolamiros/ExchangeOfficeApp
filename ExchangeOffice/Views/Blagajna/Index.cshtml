@@ -1,0 +1,145 @@
+﻿@using ExchangeOffice.ViewModels
+@{
+    ViewBag.Title = "Blagajna";
+}
+
+<div class="card">
+    <div class="card-header">
+        Računi
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="myTabContent">
+            <table class="table col-lg-12" id="listaRacuna">
+                <thead>
+                    <tr>
+                        <th scope="col">Valuta</th>
+                        <th scope="col">Opis</th>
+                        <th scope="col">Stanje</th>
+                        <th scope="col">Komande</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+@using (Ajax.BeginForm("Uplata", "Blagajna", new AjaxOptions
+{
+    HttpMethod = "POST",
+    UpdateTargetId = "uplataModal",
+    InsertionMode = InsertionMode.Replace,
+    OnSuccess = "onUplataSuccess",
+    OnFailure = "onUplataFailed"
+}))
+{
+    <div class="modal fade" id="uplataModal" tabindex="-1" role="dialog" aria-labelledby="uplataModalLabel" aria-hidden="true">
+        @{ Html.RenderPartial("_UplataPartial", new UplataViewModel()); }
+    </div>
+}
+
+
+@section scripts {
+
+    <script>
+
+        var listaRacuna = null;
+
+        $(document).ready(function () {
+
+            $('a[href="' + window.location.pathname + '"]').parent().addClass('active');
+
+            listaRacuna = $('#listaRacuna').DataTable({
+                ordering: false,
+                paging: false,
+                bInfo: false,
+                autoWidth: false,
+                lengthChange: false,
+                searching: false,
+                ajax: {
+                    url: "Blagajna/VratiRacune",
+                    type: "GET",
+                    dataSrc: "",
+                    contentType: "application/json"
+                },
+                columns: [
+                    {
+                        data: "SifraValute",
+                        className: "text-center",
+                        visible: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Opis",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "Stanje",
+                        className: "text-center",
+                        visible: true,
+                        searchable: true,
+                        orderable: true
+                    },
+                    {
+                        data: "SifraValute",
+                        className: "text-center",
+                        render: function (data, type, row) {
+                            var display = '<button type="button" data-valuta="' + row.SifraValute + '" class="open-uplata btn btn-sm btn-success" data-toggle="modal" data-target="#uplataModal">' +
+                                "Uplata na račun" +
+                                "</button >";
+                            return display;
+                        }
+                    }
+                ],
+                "oLanguage": {
+                    "oPaginate": {
+                        "sNext": "Sledeća stranica",
+                        "sPrevious": "Prethodna stranica",
+                        "sInfoEmpty": "Nema stavki",
+                        "sInfo": "Got a total of _TOTAL_ entries to show (_START_ to _END_)",
+                        "sEmptyTable": "Nema podataka"
+                    }
+                }
+            });
+
+            $("#listaRacuna_wrapper").addClass("col-12");
+
+            $(document).on("click", ".open-uplata", function () {
+
+                var sifraValute = $(this).data('valuta');
+                $("#uplata_sifraValute").val(sifraValute);
+            });
+
+
+            $('#uplataModal').on('hidden.bs.modal', function () {
+                $.ajax({
+                    url: "Blagajna/Uplata",
+                    type: "GET",
+                    dataType: 'html',
+                    success: function (data) {
+                        $("#uplataModal").html(data);
+                    }
+                });
+            });
+
+        });
+
+        function onUplataSuccess() {
+
+            $("#uplataModal").modal('toggle');
+
+            listaRacuna.ajax.reload();
+        };
+
+        function onUplataFailed(data) {
+
+            $("#uplataModal").html(data.responseText);
+        };
+
+    </script>
+}

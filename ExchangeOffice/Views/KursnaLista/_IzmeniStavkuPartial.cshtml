@@ -1,0 +1,61 @@
+﻿@model ExchangeOffice.ViewModels.StavkaKursneListeEditViewModel
+
+<div class="modal-dialog" role="document">
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h5 class="modal-title">Izmena stavke kursne liste</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="modal-body" id="izmenaStavkeModalBody">
+
+            @Html.AntiForgeryToken()
+
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            @Html.Hidden("DatumListe", Model.DatumListe, new { id = "izmena_datumListe" })
+            @Html.Hidden("ValutaListe", Model.ValutaListe, new { id = "izmena_valutaListe" })
+
+            <div class="form-group row">
+                @Html.LabelFor(model => model.Valuta, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Valuta, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly", id = "izmena_valuta" } })
+                    @Html.ValidationMessageFor(model => model.Valuta, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(model => model.KupovniKurs, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.KupovniKurs, new { htmlAttributes = new { @class = "form-control", id = "izmena_kupovniKurs" } })
+                    @Html.ValidationMessageFor(model => model.KupovniKurs, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(model => model.ProdajniKurs, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.ProdajniKurs, new { htmlAttributes = new { @class = "form-control", id = "izmena_srednjiKurs" } })
+                    @Html.ValidationMessageFor(model => model.ProdajniKurs, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.LabelFor(model => model.SrednjiKurs, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.SrednjiKurs, new { htmlAttributes = new { @class = "form-control", id = "izmena_prodajniKurs" } })
+                    @Html.ValidationMessageFor(model => model.SrednjiKurs, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Odustani</button>
+            <button type="submit" class="btn btn-primary">Izmeni</button>
+        </div>
+    </div>
+</div>
